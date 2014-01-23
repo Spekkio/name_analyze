@@ -102,8 +102,8 @@ int main(void)
 	  {
 	    reset();
 	    namebf[r]='\0';
-	    printf("%s -> %s\n",convert(tnmebf,namebf,r),&namebf[0]);
-	    /*printf("%s\n",convert(tnmebf,namebf,r-1));*/
+	    /*printf("%s -> %s\n",convert(tnmebf,namebf,r),&namebf[0]);*/
+	    printf("%s\n",convert(tnmebf,namebf,r-1));
 	    r=0;
 	  }
       }
