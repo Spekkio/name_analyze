@@ -73,6 +73,7 @@ char * convert(char * out, const char * in, const int len)
     } else out[i] = '_';
     i++;
   }
+  out[i]='\0';
   return out;
 }
 
@@ -100,9 +101,9 @@ int main(void)
 	else
 	  {
 	    reset();
-	    namebf[r++]='\0';
-	    /*printf("name: %s -> %s\n",&namebf[0],convert(tnmebf,namebf,r-1));*/
-	    printf("%s\n",convert(tnmebf,namebf,r-1));
+	    namebf[r]='\0';
+	    printf("%s -> %s\n",convert(tnmebf,namebf,r),&namebf[0]);
+	    /*printf("%s\n",convert(tnmebf,namebf,r-1));*/
 	    r=0;
 	  }
       }
