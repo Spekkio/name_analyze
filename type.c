@@ -6,6 +6,9 @@
 
 /*analyze types*/
 
+const char con[] = {'B','C','D','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Z'}; /*20*/
+const char voc[] = {'A','E','I','O','U','Y'}; /*6*/
+
 #define VOC 0
 #define CON 1
 #define END 2
@@ -14,6 +17,7 @@ struct tree_node
 {
   float p[3];                        /*probability for each path*/
   unsigned int count[3];
+  unsigned long int index[3];
   struct tree_node * tree_node[3];   /*pointers to the next paths*/
 }tree_node;
 
@@ -88,9 +92,13 @@ void setupNodes(void)
     nodes[c].count[CON] = 0;
     nodes[c].count[END] = 0;
 
-    nodes[c].tree_node[VOC] = &nodes[i++];
-    nodes[c].tree_node[CON] = &nodes[i++];
-    nodes[c].tree_node[END] = &nodes[i++];
+    nodes[c].index[VOC] = i++;
+    nodes[c].index[CON] = i++;
+    nodes[c].index[END] = i++;
+
+    nodes[c].tree_node[VOC] = &nodes[nodes[c].index[VOC]];
+    nodes[c].tree_node[CON] = &nodes[nodes[c].index[CON]];
+    nodes[c].tree_node[END] = &nodes[nodes[c].index[END]];
 
     c++;
   }
@@ -99,7 +107,7 @@ void setupNodes(void)
 
 int main(void)
 {
-  unsigned int i, l;
+  unsigned int i, l,cn;
   float sum;
   struct tree_node * n;
   FILE * f;
@@ -116,12 +124,12 @@ int main(void)
       l=fread(buf, 1,1,f);
       if((!(c=='\n' || c=='\r')) && l!=0)
 	{
+	  /*printf("%c",c);*/
 	  switch(c)
 	    {
 	    case 'C':
 	      n->count[CON]++;
 	      n = n->tree_node[CON]; /*next node*/
-
 	      break;
 
 	    case 'V':
@@ -135,6 +143,7 @@ int main(void)
 	}
       else {
 	/*reset*/
+	/*printf("\n");*/
 	n->count[END]++;
 	n = &nodes[0];
       }
@@ -147,11 +156,48 @@ int main(void)
     nodes[i].p[0] = ((float)nodes[i].count[0])/sum;
     nodes[i].p[1] = ((float)nodes[i].count[1])/sum;
     nodes[i].p[2] = ((float)nodes[i].count[2])/sum;
+    /*
+    printf("node: %u -> %.5f(%lu) %.5f(%lu) %.5f(%lu)\n",i,
+	   nodes[i].p[0]*100,nodes[i].index[0],
+	   nodes[i].p[1]*100,nodes[i].index[1],
+	   nodes[i].p[2]*100,nodes[i].index[2]);
+    */
 
-    printf("node: %u -> %.3f %.3f %.3f\n",i,nodes[i].p[0]*100,nodes[i].p[1]*100,nodes[i].p[2]*100);
     sum=0;
     i++;
   }
+
+  /*test*/
+  n = &nodes[0];
+  cn=0;
+
+  while(cn<100000000) {
+  l=1;
+  n = &nodes[0];
+  while(l) {
+    i = rand() % 100;
+
+    if(i<(unsigned int)(round(n->p[VOC]*100)))
+      {
+	n = n->tree_node[VOC]; /*next node*/
+	printf("%c",voc[rand() % 5]);
+	if(n==0) l=0;
+      }
+    else if(i<(unsigned int)(round(n->p[VOC]*100 + n->p[CON]*100)))
+      {
+	n = n->tree_node[CON]; /*next node*/
+	printf("%c",con[rand() % 19]);
+	if(n==0) l=0;
+      }
+    else if(i<=(unsigned int)(round(n->p[VOC]*100 + n->p[CON]*100 + n->p[END]*100)))
+      {
+	l=0;
+      }
+  }
+  printf("\n");
+  cn++;
+  }
+
 
   fclose(f);
 

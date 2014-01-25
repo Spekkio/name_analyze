@@ -77,6 +77,64 @@ char * convert(char * out, const char * in, const int len)
   return out;
 }
 
+void analyze(const char * in,const int len)
+{
+  int i,c;
+  char anaz[255], temp[255], last;
+  convert(anaz,in,len);
+
+  i=0;
+  c=0;
+  last='S';
+  while(i<len)
+    {
+      switch(anaz[i])
+	{
+	case 'C':
+	  /*********************/
+	  switch(last)
+	    {
+	    case 'V':
+	      temp[c++] = '\0';
+	      /*printf("-%s\n",temp);*/
+	      c=0;
+	    case 'S':
+	    case 'C':
+	      temp[c++] = in[i];
+	      last = anaz[i];
+	      break;
+	    default: break;
+	    }
+	  /*********************/
+	  break;
+
+	case 'V':
+	  /*********************/
+	  switch(last)
+	    {
+	    case 'C':
+	      temp[c++] = '\0';
+	      /*printf("-%s\n",temp);*/
+	      c=0;
+	    case 'S':
+	    case 'V':
+	      temp[c++] = in[i];
+	      last = anaz[i];
+	      break;
+	    default: break;
+	    }
+	  /*********************/
+	  break;
+
+	default:
+	  break;
+	}
+      i++;
+    }
+
+  temp[0]=temp[0];
+}
+
 int main(void)
 {
   int r;
@@ -102,8 +160,9 @@ int main(void)
 	  {
 	    reset();
 	    namebf[r]='\0';
-	    /*printf("%s -> %s\n",convert(tnmebf,namebf,r),&namebf[0]);*/
-	    printf("%s\n",convert(tnmebf,namebf,r-1));
+	    /*printf("%s -> %s\n",convert(tnmebf,namebf,r),&namebf[0]);*/	    
+	    printf("%s\n",convert(tnmebf,namebf,r));
+	    analyze(namebf,r);
 	    r=0;
 	  }
       }
