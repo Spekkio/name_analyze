@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <strings.h>
+#include <string.h>
 
 /*'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'*/
 
@@ -15,6 +15,11 @@ char buffer[5];
 char typebf[5];
 char namebf[255];
 char tnmebf[255];
+
+#define VOCCON  1
+#define LETTERS 2
+
+int flags=0;
 
 void rotate(const char n)
 {
@@ -77,6 +82,9 @@ char * convert(char * out, const char * in, const int len)
   return out;
 }
 
+
+#define PRINTL printf("%s\t%u\n",temp,i-c+1)
+
 void analyze(const char * in,const int len)
 {
   int i,c;
@@ -96,7 +104,7 @@ void analyze(const char * in,const int len)
 	    {
 	    case 'V':
 	      temp[c++] = '\0';
-	      /*printf("-%s\n",temp);*/
+	      PRINTL;
 	      c=0;
 	    case 'S':
 	    case 'C':
@@ -114,7 +122,7 @@ void analyze(const char * in,const int len)
 	    {
 	    case 'C':
 	      temp[c++] = '\0';
-	      /*printf("-%s\n",temp);*/
+	      PRINTL;
 	      c=0;
 	    case 'S':
 	    case 'V':
@@ -132,14 +140,48 @@ void analyze(const char * in,const int len)
       i++;
     }
 
+  temp[c++] = '\0';
+  PRINTL;
+
   temp[0]=temp[0];
 }
 
-int main(void)
+void params(int argc, char **argv)
+{
+  int i=0;
+  while(i<argc)
+    {
+      if(strncmp(argv[i],"--help",6)==0)
+	{
+	  printf(" -a\tanalyze vocals and consonants\n");
+	  printf(" -l\tanalyze letters according to voc/con\n");
+	  exit(0);
+	}
+      else if(strncmp(argv[i],"-a",2)==0)
+	{
+	  flags=0;
+	  flags|=VOCCON;
+	}
+      else if(strncmp(argv[i],"-l",2)==0)
+	{
+	  flags=0;
+	  flags|=LETTERS;
+	}
+      i++;
+    }
+}
+
+int main(int argc, char **argv)
 {
   int r;
   FILE * f;
   char l;
+
+  params(argc, argv);
+  if(flags==0)
+    {
+      flags=VOCCON;
+    }
 
   f = fopen("names.txt","r");
 
@@ -161,8 +203,13 @@ int main(void)
 	    reset();
 	    namebf[r]='\0';
 	    /*printf("%s -> %s\n",convert(tnmebf,namebf,r),&namebf[0]);*/	    
-	    printf("%s\n",convert(tnmebf,namebf,r));
-	    analyze(namebf,r);
+
+	    if(flags&VOCCON)
+	      printf("%s\n",convert(tnmebf,namebf,r));
+
+	    if(flags&LETTERS)
+	      analyze(namebf,r);
+
 	    r=0;
 	  }
       }
